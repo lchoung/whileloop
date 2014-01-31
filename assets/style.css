@@ -1,0 +1,36 @@
+body {
+  font-family: Verdana, Helvetica, sans-serif;
+  background-color: #DDDDDD;
+}
+
+
+#header{
+	position: fixed;
+	top: 0px;
+	margin: auto;
+	padding: 10px;
+	width: 100%;
+	height: 40px;
+	background-color: #FFFFFF;
+	z-index: 1000;
+}
+
+.wrapper{
+	padding: 40px;
+}
+
+.task:nth-child(odd){
+	background-color: #F2AEC2;
+}
+.task:nth-child(even){
+	background-color: #FFFFFF;
+}
+
+.edit{
+	background-color: #AEEFF2;
+}
+
+.input{
+	display: none;
+	top: 300px;
+}

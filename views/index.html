@@ -1,0 +1,143 @@
+<!-- passed in: list of users tags, list of entries for each tag -->
+<head>
+	<!-- JQuery Library -->
+<script src="/assets/js/jquery.js"></script>
+<script src="/assets/js/jeditable.js"></script>
+
+<link rel="stylesheet" href="/assets/css/normalize.css">
+<link rel="stylesheet" href="/assets/css/foundation.css">
+<link rel = "stylesheet" type = "text/css" href="/assets/style.css">
+</head>
+
+<body>
+<div id = 'header'>
+	I Was Too Lazy To Actually Do CSS That's Why This Page is Fugly
+</div>
+<div class = 'wrapper'> <!-- Don't get rid of this -->
+<div class = "row">
+{% for tag in tags %}
+	<div class = 'taskbox'>
+		<div class="medium-4 columns">  <!-- foundation tag -->
+	{% for task in tasks %}
+		{% if (task[0]).tag == tag[0] %}
+			<div id = '{{task[1]}}' class = 'task'>
+			{{(task[0]).task}}
+			</div>
+			<div id = 'input{{task[1]}}' class = 'input'>
+				<input type= "text" id = 'form{{task[1]}}'>
+				</input>
+			</div>
+		{% endif %}
+	{% endfor %}
+	<div id = 'add{{tag[1]}}' class = 'edit'>
+		Add Task
+	</div>
+			<div id = 'addinput{{tag[1]}}' class = 'newinput'>
+				<input type= "text" id = 'addform{{tag[1]}}'>
+				</input>
+			</div>
+	</div>
+	</div>
+{% endfor %}
+</div>
+</div>
+</body>
+
+<div id= 'footer'></div>
+
+<script>
+$(document).ready(function()
+{
+	$('.edit').click(function(){
+		var ID = $(this).attr('id');
+		ID = ID.substring(3);
+		$(this).hide();
+		$('#addinput' + ID).show();
+	})
+
+	$('.newinput').change(function()
+	{
+		var ID=$(this).attr('id');
+		ID = ID.substring(8);
+		var task=$('#addform' + ID).val();
+		console.log('#addform' + ID);
+		console.log(task);
+		/*var data = '{id:' + ID +', task:'+ task + '}';*/
+		var data = {tid: ID, task: task};
+		
+		$(this).hide();
+		$('#add'+ID).html(task);
+		$('#add'+ID).show();
+
+		if(task.length>0)
+		{
+			$.ajax({
+			type: "POST",
+			url: '/new',
+			data: JSON.stringify(data),
+			contentType: 'application/json',
+			dataType: "json",
+			cache: false,
+			success: function()
+			{
+				console.log("hello");
+			}
+			});
+		}
+		else
+		{
+		alert('Enter something.');
+		}
+		
+		return false;
+
+
+	});
+
+	$('.task').click(function(){
+		var ID = $(this).attr('id');
+		$(this).hide();
+		$('#input'+ID).show();
+	});
+
+	$('.input').change(function()
+	{
+		var ID=$(this).attr('id');
+		ID = ID.substring(5);
+		var task=$('#form' + ID).val();
+		console.log('#form' + ID);
+		console.log(task);
+		/*var data = '{id:' + ID +', task:'+ task + '}';*/
+		var data = {tid: ID, task: task};
+		
+		$(this).hide();
+		$('#'+ID).html(task);
+		$('#'+ID).show();
+
+		if(task.length>0)
+		{
+			$.ajax({
+			type: "POST",
+			url: '/update',
+			data: JSON.stringify(data),
+			contentType: 'application/json',
+			dataType: "json",
+			cache: false,
+			success: function()
+			{
+				console.log("hello");
+			}
+			});
+		}
+		else
+		{
+		alert('Enter something.');
+		}
+		
+		return false;
+
+
+	});
+
+});
+</script>
