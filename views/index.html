@@ -11,35 +11,35 @@
 
 <body>
 <div id = 'header'>
-	I Was Too Lazy To Actually Do CSS That's Why This Page is Fugly
+	Hey {{user}}, what are you doing today?
 </div>
 <div class = 'wrapper'> <!-- Don't get rid of this -->
-<div class = "row">
 {% for tag in tags %}
-	<div class = 'taskbox'>
-		<div class="medium-4 columns">  <!-- foundation tag -->
+	<div class = 'taskbox' id= '{{tag[1]}}'>
+	<div class= 'title'>
+		{{tag[0]}}
+	</div>
 	{% for task in tasks %}
-		{% if (task[0]).tag == tag[0] %}
-			<div id = '{{task[1]}}' class = 'task'>
-			{{(task[0]).task}}
-			</div>
-			<div id = 'input{{task[1]}}' class = 'input'>
-				<input type= "text" id = 'form{{task[1]}}'>
-				</input>
-			</div>
-		{% endif %}
+	{% if (task[0]).tag == tag[0] %}
+		<div id = '{{task[1]}}' class = 'task'>
+		{{(task[0]).task}}
+		</div>
+		<div id = 'input{{task[1]}}' class = 'input'>
+			<input type= "text" id = 'form{{task[1]}}' class= 'form'>
+			</input>
+		</div>
+	{% endif %}
 	{% endfor %}
-	<div id = 'add{{tag[1]}}' class = 'edit'>
-		Add Task
+	<div id = 'add{{tag[1]}}' class = 'new'>
+		[+]
 	</div>
-			<div id = 'addinput{{tag[1]}}' class = 'newinput'>
-				<input type= "text" id = 'addform{{tag[1]}}'>
-				</input>
-			</div>
+	<div id = 'newinput{{tag[1]}}' class = 'newinput'>
+		<input type= "text" id = 'addform{{tag[1]}}' class = 'form'>
+		</input>
 	</div>
 	</div>
+	<!--</div>-->
 {% endfor %}
-</div>
 </div>
 </body>
 
@@ -48,27 +48,26 @@
 <script>
 $(document).ready(function()
 {
-	$('.edit').click(function(){
-		var ID = $(this).attr('id');
+	var ID = 0; //keep track of current editing position
+	var editing = false;
+
+	$('.new').click(function(){ // Click to Add
+		ID = $(this).attr('id');
 		ID = ID.substring(3);
-		$(this).hide();
-		$('#addinput' + ID).show();
+		$(this).hide(); //
+		$('#newinput' + ID).show();
+		console.log(ID);
 	})
 
-	$('.newinput').change(function()
+	$('.newinput').change(function() //Add new post
 	{
-		var ID=$(this).attr('id');
+		ID=$(this).attr('id'); //tag ID
 		ID = ID.substring(8);
 		var task=$('#addform' + ID).val();
 		console.log('#addform' + ID);
-		console.log(task);
+		console.log('task'+task);
 		/*var data = '{id:' + ID +', task:'+ task + '}';*/
 		var data = {tid: ID, task: task};
-		
-		$(this).hide();
-		$('#add'+ID).html(task);
-		$('#add'+ID).show();
-
 		if(task.length>0)
 		{
 			$.ajax({
@@ -80,9 +79,14 @@ $(document).ready(function()
 			cache: false,
 			success: function()
 			{
-				console.log("hello");
 			}
 			});
+		console.log(task);
+		$("<div class='task'>" + task + "</div>").insertBefore("#add" +ID);
+		$(this).hide();
+		$('#add' +ID).show();
+		//$('#add' + ID).prepend("<div class='task'>"+ task + "</div>");
+			
 		}
 		else
 		{
@@ -94,15 +98,17 @@ $(document).ready(function()
 
 	});
 
-	$('.task').click(function(){
-		var ID = $(this).attr('id');
+	$('.task').click(function(event){
+		event.stopPropagation();
+		editing = true;
+		ID = $(this).attr('id');
 		$(this).hide();
 		$('#input'+ID).show();
 	});
 
-	$('.input').change(function()
+	$('.input').change(function() //Update post
 	{
-		var ID=$(this).attr('id');
+		ID=$(this).attr('id');
 		ID = ID.substring(5);
 		var task=$('#form' + ID).val();
 		console.log('#form' + ID);
@@ -111,7 +117,7 @@ $(document).ready(function()
 		var data = {tid: ID, task: task};
 		
 		$(this).hide();
-		$('#'+ID).html(task);
+		$('#'+ID).text(task);
 		$('#'+ID).show();
 
 		if(task.length>0)
@@ -137,6 +143,13 @@ $(document).ready(function()
 		return false;
 
 
+	}).blur(function(event) //click outside to close edit
+	{
+		console.log("THIS"+ID);
+		if (editing == true) {
+				$('#input' + ID).hide();
+				$('#'+ID).show();
+			}
 	});
 
 });

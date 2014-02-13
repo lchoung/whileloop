@@ -37,18 +37,6 @@ def getPage(handler, page):
     else:
         handler.redirect(users.create_login_url(self.request.uri))
 
-class Update(webapp2.RequestHandler):
-    def post(self):
-        #user = users.get_current_user()
-        data = json.loads(self.request.body)
-        logging.info(data["tid"])
-        logging.info(data)
-        tid = data["tid"]
-        entry = models.Task.get_by_id(int(tid))
-        logging.info(entry)
-        entry.task = data['task']
-        entry.put()
-
 class MainHandler(webapp2.RequestHandler):
     def get(self):
         user = users.get_current_user()
@@ -71,7 +59,7 @@ class MainHandler(webapp2.RequestHandler):
                         #logging.info("Hello")
                         tags_with_id.append((tag, obj.key.id()))
                 logging.info(tags_with_id)
-                self.response.write(template.render(tags = tags_with_id, tasks = tasks_with_id))
+                self.response.write(template.render(user = user, tags = tags_with_id, tasks = tasks_with_id))
             else:
                 self.response.write("Add a task!")
 
@@ -82,6 +70,31 @@ class MainHandler(webapp2.RequestHandler):
 class Oops(Exception):
     def __init__(self, foo):
         self.foo = foo
+
+class Update(webapp2.RequestHandler):
+    def post(self):
+        #user = users.get_current_user()
+        data = json.loads(self.request.body)
+        logging.info(data["tid"])
+        logging.info(data)
+        tid = data["tid"]
+        entry = models.Task.get_by_id(int(tid))
+        logging.info(entry)
+        entry.task = data['task']
+        entry.put()
+
+class NewTaskHandler(webapp2.RequestHandler):
+    def post(self):
+        user = users.get_current_user()
+        data = json.loads(self.request.body)
+        tag = models.Tag.get_by_id(int(data["tid"]))
+        logging.info(tag)
+        tag = tag.tag
+        entry = models.Task()
+        entry.author = user
+        entry.task = data['task']
+        entry.tag = tag
+        entry.put()
 
 class AddTaskHandler(webapp2.RequestHandler):
     def get(self):
@@ -127,5 +140,6 @@ class AddTaskHandler(webapp2.RequestHandler):
 app = webapp2.WSGIApplication([
     ('/', MainHandler),
     ('/add', AddTaskHandler),
+    ('/new', NewTaskHandler),
     ('/update', Update)], 
     debug=True)
